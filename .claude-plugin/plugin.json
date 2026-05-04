@@ -1,0 +1,8 @@
+{
+  "name": "11mirror",
+  "version": "0.1.0",
+  "description": "Enterprise knowledge layer for finance operations. Connects to company knowledge brain (people, playbooks, SOPs) and structured data graph (accounting, procurement, vendor payments, financial reports). Streamline month-end close, vendor management, financial analysis, and operational knowledge retrieval.",
+  "author": {
+    "name": "11Mirror"
+  }
+}

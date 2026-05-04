@@ -1,0 +1,10 @@
+{
+  "name": "11mirror",
+  "description": "11Mirror enterprise knowledge plugins",
+  "plugins": [
+    {
+      "name": "11mirror",
+      "path": "."
+    }
+  ]
+}
