@@ -2,7 +2,10 @@
   "mcpServers": {
     "11mirror": {
       "type": "http",
-      "url": "https://huff-displease-marshy.ngrok-free.dev/mcp"
+      "url": "https://huff-displease-marshy.ngrok-free.dev/mcp",
+      "headers": {
+        "Authorization": "Bearer ${ELEVEN_MIRROR_API_KEY}"
+      }
     }
   }
 }
