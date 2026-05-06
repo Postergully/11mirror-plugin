@@ -17,6 +17,14 @@ claude plugins add 11mirror
 claude plugin install 11mirror
 ```
 
+### OpenClaw
+This repository includes `openclaw.plugin.json` for OpenClaw installs. Configure the plugin with:
+
+| Key | Description |
+|-----|-------------|
+| `gateway_url` | HTTPS URL of the 11Mirror gateway `/mcp` endpoint, for example `https://connect.neuu.in/mcp` |
+| `gateway_api_key` | Bearer token for the gateway |
+
 ## Capabilities
 
 ### Knowledge Brain (People & Process)
