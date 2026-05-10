@@ -7,26 +7,101 @@
  * stdout. Lets OpenClaw bundle loaders that only support stdio transports
  * consume the remote gateway.
  *
- * Environment:
- *   GATEWAY_URL        Required. Full URL of the gateway /mcp endpoint.
- *   GATEWAY_API_KEY    Required. Bearer token forwarded to the gateway.
+ * Config resolution (in order; first match wins):
+ *   1. Env vars GATEWAY_URL / GATEWAY_API_KEY
+ *      (used when the host actually interpolates configSchema into env)
+ *   2. ${CLAUDE_PLUGIN_ROOT}/.config.json with {gateway_url, gateway_api_key}
+ *      (drop-in override written by the host or the operator)
+ *   3. ~/.openclaw/openclaw.json → plugins.entries.11mirror.config
+ *      (OpenClaw 2026.5.7 stores configSchema values here; it does not
+ *      interpolate them into bundle env, so the bridge reads them itself)
  *
- * No npm dependencies — Node 18+ builtins only (fetch, readline).
+ * No npm dependencies — Node 18+ builtins only (fetch, readline, fs, path).
  */
 
 const readline = require("node:readline");
-
-const GATEWAY_URL = process.env.GATEWAY_URL;
-const GATEWAY_API_KEY = process.env.GATEWAY_API_KEY;
+const fs = require("node:fs");
+const path = require("node:path");
+const os = require("node:os");
 
 function fail(msg) {
   process.stderr.write(`[11mirror-bridge] ${msg}\n`);
   process.exit(1);
 }
 
-if (!GATEWAY_URL) fail("GATEWAY_URL is required");
-if (!GATEWAY_API_KEY) fail("GATEWAY_API_KEY is required");
+function looksUninterpolated(v) {
+  // "${gateway_url}" style placeholders the bundle loader never expanded.
+  return typeof v === "string" && /^\$\{[^}]+\}$/.test(v.trim());
+}
+
+function readJsonSafe(p) {
+  try {
+    if (!fs.existsSync(p)) return null;
+    return JSON.parse(fs.readFileSync(p, "utf8"));
+  } catch (err) {
+    process.stderr.write(`[11mirror-bridge] failed to read ${p}: ${err.message}\n`);
+    return null;
+  }
+}
+
+function fromEnv() {
+  const url = process.env.GATEWAY_URL;
+  const key = process.env.GATEWAY_API_KEY;
+  if (!url || !key) return null;
+  if (looksUninterpolated(url) || looksUninterpolated(key)) return null;
+  return { url, key, source: "env" };
+}
+
+function fromPluginConfigFile() {
+  const root = process.env.CLAUDE_PLUGIN_ROOT;
+  if (!root) return null;
+  const cfg = readJsonSafe(path.join(root, ".config.json"));
+  if (!cfg) return null;
+  const url = cfg.gateway_url || cfg.GATEWAY_URL;
+  const key = cfg.gateway_api_key || cfg.GATEWAY_API_KEY;
+  if (!url || !key) return null;
+  return { url, key, source: `${root}/.config.json` };
+}
+
+function fromOpenclawConfig() {
+  const candidates = [
+    process.env.OPENCLAW_CONFIG,
+    path.join(os.homedir(), ".openclaw", "openclaw.json"),
+  ].filter(Boolean);
+  for (const p of candidates) {
+    const cfg = readJsonSafe(p);
+    if (!cfg) continue;
+    const entry =
+      cfg?.plugins?.entries?.["11mirror"]?.config ||
+      cfg?.plugins?.["11mirror"]?.config ||
+      null;
+    if (!entry) continue;
+    const url = entry.gateway_url;
+    const key = entry.gateway_api_key;
+    if (!url || !key) continue;
+    return { url, key, source: p };
+  }
+  return null;
+}
+
+function resolveConfig() {
+  return fromEnv() || fromPluginConfigFile() || fromOpenclawConfig();
+}
+
+const cfg = resolveConfig();
+if (!cfg) {
+  fail(
+    "Could not resolve gateway_url / gateway_api_key. " +
+      "Checked env (GATEWAY_URL/GATEWAY_API_KEY), " +
+      "$CLAUDE_PLUGIN_ROOT/.config.json, " +
+      "and ~/.openclaw/openclaw.json → plugins.entries.11mirror.config.",
+  );
+}
 if (typeof fetch !== "function") fail("Node 18+ required (global fetch missing)");
+
+const GATEWAY_URL = cfg.url;
+const GATEWAY_API_KEY = cfg.key;
+process.stderr.write(`[11mirror-bridge] config source: ${cfg.source}\n`);
 
 let sessionId = null;
 
