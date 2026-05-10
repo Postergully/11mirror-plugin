@@ -17,17 +17,17 @@ claude plugins add 11mirror
 claude plugin install 11mirror
 ```
 
-If you prefer to wire the gateway up by hand, copy `examples/claude-code.mcp.json` into your project root as `.mcp.json` and set `ELEVEN_MIRROR_API_KEY` in your environment. The file used to live at the repo root, but OpenClaw's bundle loader was picking it up and overriding the stdio bridge entry in `openclaw.plugin.json` — so Claude Code's manifest now lives under `examples/` as a reference template you copy into your own project.
+If you prefer to wire the gateway up by hand, copy `examples/claude-code.mcp.json` into your project root as `.mcp.json` and set `ELEVEN_MIRROR_API_KEY` in your environment.
 
 ### OpenClaw
-This repository includes `openclaw.plugin.json` for OpenClaw installs. Configure the plugin with:
+Loaded as a native OpenClaw bundle via `openclaw.plugin.json`. Configure the plugin with:
 
 | Key | Description |
 |-----|-------------|
 | `gateway_url` | HTTPS URL of the 11Mirror gateway `/mcp` endpoint, for example `https://connect.neuu.in/mcp` |
 | `gateway_api_key` | Bearer token for the gateway |
 
-OpenClaw's bundle plugin loader currently only supports stdio MCP transports, so the plugin ships `bin/mcp-stdio-bridge.js` — a zero-dependency Node script that reads MCP JSON-RPC from stdin and relays it to the remote HTTP gateway with the bearer token. The manifest wires this up automatically. Requires Node 18+ on the host.
+OpenClaw's bundle loader only supports stdio MCP transports, so the plugin ships `bin/mcp-stdio-bridge.js` — a zero-dependency Node script that reads MCP JSON-RPC from stdin and relays it to the remote HTTP gateway with the bearer token. The bridge self-configures: it reads `gateway_url` / `gateway_api_key` directly from `~/.openclaw/openclaw.json` under `plugins.entries.11mirror.config`, so no env-var interpolation is needed. Requires Node 18+ on the host.
 
 ## Capabilities
 

@@ -20,13 +20,8 @@
   },
   "mcpServers": {
     "11mirror": {
-      "type": "stdio",
-      "command": "node",
-      "args": ["${pluginDir}/bin/mcp-stdio-bridge.js"],
-      "env": {
-        "GATEWAY_URL": "${gateway_url}",
-        "GATEWAY_API_KEY": "${gateway_api_key}"
-      }
+      "command": "./bin/mcp-stdio-bridge.js",
+      "args": []
     }
   },
   "skills": [
