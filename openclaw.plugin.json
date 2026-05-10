@@ -20,10 +20,12 @@
   },
   "mcpServers": {
     "11mirror": {
-      "type": "http",
-      "url": "${gateway_url}",
-      "headers": {
-        "Authorization": "Bearer ${gateway_api_key}"
+      "type": "stdio",
+      "command": "node",
+      "args": ["${pluginDir}/bin/mcp-stdio-bridge.js"],
+      "env": {
+        "GATEWAY_URL": "${gateway_url}",
+        "GATEWAY_API_KEY": "${gateway_api_key}"
       }
     }
   },
