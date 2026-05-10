@@ -17,6 +17,8 @@ claude plugins add 11mirror
 claude plugin install 11mirror
 ```
 
+If you prefer to wire the gateway up by hand, copy `examples/claude-code.mcp.json` into your project root as `.mcp.json` and set `ELEVEN_MIRROR_API_KEY` in your environment. The file used to live at the repo root, but OpenClaw's bundle loader was picking it up and overriding the stdio bridge entry in `openclaw.plugin.json` — so Claude Code's manifest now lives under `examples/` as a reference template you copy into your own project.
+
 ### OpenClaw
 This repository includes `openclaw.plugin.json` for OpenClaw installs. Configure the plugin with:
 
