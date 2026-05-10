@@ -1,8 +1,19 @@
 {
   "name": "11mirror",
-  "version": "0.1.0",
-  "description": "Enterprise knowledge layer for finance operations. Connects to company knowledge brain (people, playbooks, SOPs) and structured data graph (accounting, procurement, vendor payments, financial reports). Streamline month-end close, vendor management, financial analysis, and operational knowledge retrieval.",
+  "version": "0.26.6-fbrain.1",
+  "description": "11Mirror enterprise knowledge layer — fbrain + Cognee behind a unified MCP gateway.",
   "author": {
     "name": "11Mirror"
+  },
+  "mcpServers": {
+    "11mirror": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/bin/mcp-stdio-bridge.js"],
+      "env": {
+        "GATEWAY_URL": "${gateway_url}",
+        "GATEWAY_API_KEY": "${gateway_api_key}"
+      }
+    }
   }
 }
