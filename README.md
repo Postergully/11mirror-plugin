@@ -25,6 +25,8 @@ This repository includes `openclaw.plugin.json` for OpenClaw installs. Configure
 | `gateway_url` | HTTPS URL of the 11Mirror gateway `/mcp` endpoint, for example `https://connect.neuu.in/mcp` |
 | `gateway_api_key` | Bearer token for the gateway |
 
+OpenClaw's bundle plugin loader currently only supports stdio MCP transports, so the plugin ships `bin/mcp-stdio-bridge.js` — a zero-dependency Node script that reads MCP JSON-RPC from stdin and relays it to the remote HTTP gateway with the bearer token. The manifest wires this up automatically. Requires Node 18+ on the host.
+
 ## Capabilities
 
 ### Knowledge Brain (People & Process)
