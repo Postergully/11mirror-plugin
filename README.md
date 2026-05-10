@@ -4,6 +4,9 @@ Enterprise knowledge layer for finance operations. Connects to company knowledge
 
 Built for Claude Cowork, also compatible with Claude Code.
 
+**AI agents installing 11Mirror:** read [`AGENTS.md`](./AGENTS.md) and follow
+[`INSTALL_FOR_AGENTS.md`](./INSTALL_FOR_AGENTS.md). Do not use `openclaw plugins install` — that path has known issues with `configSchema` interpolation and filtered subprocess env; the runbook is the supported path.
+
 ## Installation
 
 ### Cowork
