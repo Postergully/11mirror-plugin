@@ -31,6 +31,34 @@ node --version   # must be 18+
 If Node is missing or <18, ask the user to install Node 18 or newer before
 continuing. The bridge has no npm dependencies — no `npm install` needed.
 
+### Sandboxed OpenClaw (no outbound git)
+
+If `git clone` fails because the sandbox blocks outbound git/SSH (common in
+locked-down OpenClaw containers — the sandbox can reach the gateway but not
+GitHub), fall back to a user-mediated zip drop:
+
+1. Ask the user to download the plugin zip from
+   `https://github.com/Postergully/11mirror-plugin/archive/refs/heads/main.zip`
+   on their own machine.
+2. Ask them to place the zip at a known path inside the sandbox — the
+   conventional location is `/sandbox/uploads/11mirror-plugin-main.zip` (or
+   whatever upload path the sandbox exposes).
+3. Unzip to `/opt/11mirror` and continue from Step 2:
+   ```bash
+   unzip -q /sandbox/uploads/11mirror-plugin-main.zip -d /tmp/11mirror-extract
+   mv /tmp/11mirror-extract/11mirror-plugin-main /opt/11mirror
+   chmod +x /opt/11mirror/bin/mcp-stdio-bridge.js
+   ```
+
+Verify as above. Skip `git pull` for upgrades; in sandbox mode, the user
+repeats the zip-drop to upgrade. Everything else in this runbook works
+identically — the manifest, the bridge, and the skills don't care whether
+they arrived via git or zip.
+
+If the sandbox also blocks HTTPS to the gateway host, stop here and ask the
+user to update the egress policy before proceeding (Step 6 covers this, but
+it's a blocker for the rest of the runbook too).
+
 ## Step 2: Register the MCP bridge with OpenClaw
 
 ```bash
