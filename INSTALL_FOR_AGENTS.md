@@ -63,8 +63,8 @@ it's a blocker for the rest of the runbook too).
 
 ```bash
 openclaw mcp set 11mirror --json '{
-  "command": "node",
-  "args": ["/opt/11mirror/bin/mcp-stdio-bridge.js"]
+  "command": "/usr/local/bin/node",
+  "args": ["${CLAUDE_PLUGIN_ROOT}/bin/mcp-stdio-bridge.js"]
 }'
 ```
 
@@ -77,6 +77,43 @@ Verify:
 ```bash
 openclaw mcp list | grep 11mirror
 ```
+
+### NemoClaw / OpenShell sandbox (env-strip workaround)
+
+OpenClaw 2026.5.7 **strips the parent process env when spawning MCP children**.
+Inside a NemoClaw/OpenShell sandbox, that means `HTTPS_PROXY`,
+`NODE_EXTRA_CA_CERTS`, and friends disappear — the bridge launches, can't reach
+the proxy, and every `fetch` to the gateway fails with `fetch failed` (no
+status). The bridge self-configures fine; the problem is one layer below.
+
+Fix: wrap the command in `/bin/sh -lc` and set the env inline. Replace the
+Step 2 invocation with:
+
+```bash
+openclaw mcp set 11mirror '{
+  "command": "/bin/sh",
+  "args": [
+    "-lc",
+    "HTTPS_PROXY=http://10.200.0.1:3128 HTTP_PROXY=http://10.200.0.1:3128 NO_PROXY=127.0.0.1,localhost,::1 NODE_USE_ENV_PROXY=1 NODE_EXTRA_CA_CERTS=/etc/openshell-tls/openshell-ca.pem SSL_CERT_FILE=/etc/openshell-tls/ca-bundle.pem exec /usr/local/bin/node ${CLAUDE_PLUGIN_ROOT}/bin/mcp-stdio-bridge.js"
+  ]
+}'
+```
+
+Important notes on this form:
+- `10.200.0.1:3128` is the **NemoClaw/OpenShell** proxy address. Other sandbox
+  vendors use different IPs/ports — ask the user or read the sandbox's
+  networking docs before pasting this verbatim.
+- `/etc/openshell-tls/openshell-ca.pem` is OpenShell's TLS intercept CA.
+  If the sandbox intercepts TLS with a different CA bundle, point
+  `NODE_EXTRA_CA_CERTS` and `SSL_CERT_FILE` at the right file.
+- `exec /usr/local/bin/node ...` replaces the shell with Node so signals and
+  stdio pipe through cleanly — don't drop the `exec`.
+- The outer JSON is a single line; the shell command inside `args[1]` uses
+  spaces, not newlines. Keeping it on one line avoids JSON-escape headaches.
+
+For OpenClaw installs **outside a sandbox** (no proxy, no TLS intercept), the
+simpler non-wrapped form at the top of this step works fine. Use the wrapped
+form only when you've confirmed the sandbox strips env and forces a proxy.
 
 ## Step 3: Drop gateway config where the bridge reads it
 
@@ -202,5 +239,5 @@ is preserved across upgrades; `git pull` will not touch it.
 
 - **`config source: env` but gateway returns 401:** The host interpolated placeholder strings. Drop them from the MCP entry and rely on `/opt/11mirror/.config.json` (Step 3).
 - **Bridge logs `Could not resolve gateway_url / gateway_api_key`:** None of the three resolution paths found both values. Check `ls -la /opt/11mirror/.config.json` and verify it's readable by the user spawning the bridge.
-- **`fetch failed` with no status:** Egress is blocked. Re-check Step 6.
+- **`fetch failed` with no status:** Egress is blocked, OR the host stripped the parent env and the bridge never saw `HTTPS_PROXY` / `NODE_EXTRA_CA_CERTS`. If you're in a NemoClaw/OpenShell sandbox, switch the MCP entry to the `/bin/sh -lc` wrapped form in Step 2. Outside a sandbox, re-check Step 6.
 - **Tool not in `tools/list`:** Gateway isn't running or the bridge isn't reaching it. Run `node /opt/11mirror/bin/mcp-stdio-bridge.js` manually, send an `initialize` + `tools/list` on stdin, and read stderr.
