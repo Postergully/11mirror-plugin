@@ -95,6 +95,14 @@ When multiple skills could match:
 4. Chaining is explicit in each skill's Phases section
 5. When in doubt, ask the user
 
+**Engine choice (11Mirror deployment):** before running the skill table above, decide the shape of the question.
+
+- **Finance-ops / structured / NetSuite-shaped** → cognee FIRST. Examples: "show open vendor bills for subsidiary Y", "what's the TAL remaining-amount field for VPrep", "write a SuiteQL for AP aging", "which record types back the expense-report P&L line", "vendor master for Acme — what are their payment terms", "generate the monthly MIS for Q3", "reconcile the clearing-doc SAP field". Tools: `graph_query`, `entity_search`, `knowledge_ingest`. Datasets: `netsuite-schema-data` (schema + field catalog) or `default__netsuite-rules` (SuiteQL gotchas + sign conventions + customer config).
+- **Process / policy / prose** → fbrain. Examples: "what's our month-end close checklist", "how do we handle a subsidiary onboarding", "who signed off on the FY24 audit adjustments", "write this decision as an SOP so next month's close can reuse it". Tools: `query`, `search`, `put_page`.
+- **Mixed** (e.g. "who approves vendor payments above ₹50 lakh and what's the NetSuite status code for 'pending approval'") → run BOTH in parallel: cognee for the structured half (status code, approval field), fbrain for the policy half (approval authority, escalation). Merge in the response.
+
+Never invent NetSuite field names, status codes, or sign conventions. If neither engine returns a match, say "not in the knowledge base" and offer to ingest the missing context.
+
 ## Conventions (cross-cutting)
 
 These apply to ALL brain-writing skills:
