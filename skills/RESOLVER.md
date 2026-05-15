@@ -29,6 +29,7 @@ This is the dispatcher. Skills are the implementation. **Read the skill file bef
 |---------|-------|
 | User shares a link, article, tweet, or idea | `skills/idea-ingest/SKILL.md` |
 | Video, audio, PDF, book, YouTube, screenshot | `skills/media-ingest/SKILL.md` |
+| "Process this book", "Ingest this PDF book", "summarize this book", generic book ingest without personalization | `skills/media-ingest/SKILL.md` |
 | Meeting transcript received | `skills/meeting-ingestion/SKILL.md` |
 | Generic "ingest this" (auto-routes to above) | `skills/ingest/SKILL.md` |
 
@@ -113,24 +114,26 @@ These apply to ALL brain-writing skills:
 - `skills/_brain-filing-rules.md` — where files go
 - `skills/_output-rules.md` — output quality standards
 
-## Uncategorized
+## Reading & research skills
 
 | Trigger | Skill |
 |---------|-------|
-| "personalized version of this book" | `skills/book-mirror/SKILL.md` |
+| "personalized version of this book", "Mirror this book", "two-column book analysis", "Apply this book to my life", "personalized version" | `skills/book-mirror/SKILL.md` |
+| "strategic reading", "Read this through the lens", "Apply this to my problem", "What can I learn from this", "Extract a playbook" | `skills/strategic-reading/SKILL.md` |
+| "verify this academic claim", "Check this study", "academic verify", "Validate citation", "Retraction Watch" | `skills/academic-verify/SKILL.md` |
+| "perplexity-research", "perplexity research", "What's new about this company", "current state of", "web research pass on", "What changed about" | `skills/perplexity-research/SKILL.md` |
 
-| "enrich this article" | `skills/article-enrichment/SKILL.md` |
+## Brain enrichment & synthesis
 
-| "strategic reading" | `skills/strategic-reading/SKILL.md` |
+| Trigger | Skill |
+|---------|-------|
+| "enrich this article", "batch enrich", "enriching the article", "enrich brain pages" | `skills/article-enrichment/SKILL.md` |
+| "concept synthesis", "Synthesize my concepts", "Find patterns across my notes", "Build my intellectual map", "Trace idea evolution" | `skills/concept-synthesis/SKILL.md` |
+| "crawl my archive", "Find gold in my archive", "archive crawler", "Scan my dropbox", "Mine my old files" | `skills/archive-crawler/SKILL.md` |
 
-| "concept synthesis" | `skills/concept-synthesis/SKILL.md` |
+## Voice, audio & PDF
 
-| "perplexity research" | `skills/perplexity-research/SKILL.md` |
-
-| "crawl my archive" | `skills/archive-crawler/SKILL.md` |
-
-| "verify this academic claim" | `skills/academic-verify/SKILL.md` |
-
-| "make pdf from brain" | `skills/brain-pdf/SKILL.md` |
-
-| "voice note" | `skills/voice-note-ingest/SKILL.md` |
+| Trigger | Skill |
+|---------|-------|
+| "voice note", "voice memo", "audio message", "audio note", "Transcribe and file" | `skills/voice-note-ingest/SKILL.md` |
+| "make pdf from brain", "brain pdf", "Convert brain page to pdf", "Publish this page as pdf", "Export brain page to" | `skills/brain-pdf/SKILL.md` |
