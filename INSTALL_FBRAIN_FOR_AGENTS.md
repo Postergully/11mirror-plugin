@@ -127,8 +127,8 @@ has been DB-only — 30 pages exist in DB with `source_path = NULL`. Optionally 
 ```bash
 cd /sandbox/gbrain/fbrain && \
 DATABASE_URL=postgres://fbrain:fbrain@192.168.65.254:5433/fbrain \
-ANTHROPIC_API_KEY=$(cat /sandbox/.secrets/anthropic-key) \
-OPENAI_API_KEY=$(cat /sandbox/.secrets/openai-key) \
+ANTHROPIC_API_KEY=$(tr -d '\n\r' < /sandbox/.secrets/anthropic-key) \
+OPENAI_API_KEY=$(tr -d '\n\r' < /sandbox/.secrets/openai-key) \
 /sandbox/gbrain/bun run src/cli.ts sync --direction db-to-fs --dry-run
 ```
 
