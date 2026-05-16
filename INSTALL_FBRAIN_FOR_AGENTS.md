@@ -25,7 +25,7 @@ ls /sandbox/.secrets/anthropic-key /sandbox/.secrets/openai-key
 
 Verify: `bun`, `fbrain/`, `start-gbrain-daemon.sh`, `INSTALL_FBRAIN_FOR_AGENTS.md`,
 `uninstall-fbrain.sh`, `manifest.json` present in `/sandbox/gbrain`. Manifest says
-`fbrain_sha = baf1a47798cb145d00bfce4fa94f85a94c8d7e07`. Both secret files exist
+`fbrain_sha = 64c1a4f207ea07213c15de2008b2c12a3d1b2342`. Both secret files exist
 with non-zero size.
 
 If anything missing: ask operator to re-run `lolly-fbrain-push-to-pod.sh`.
