@@ -18,9 +18,17 @@ fbrain inherits credentials from openclaw. **No new secret files are pushed by u
 
 | Need | Source | Notes |
 |---|---|---|
-| **Bedrock** (synthesize, dream cycle) | `/sandbox/.secrets/bedrock-key` | Already managed by openclaw. Daemon exports `AWS_BEARER_TOKEN_BEDROCK` + `AWS_REGION=us-east-1`. |
-| **OpenAI** (embeddings — `text-embedding-3-large`, 1536 dims) | `/sandbox/.secrets/openai-key` | Phase 1 of the credential-providers migration injects this; operator runs nanoclaw's `set-openai-key.sh` + `restore.sh --inject-openai-key`. |
-| **Anthropic Messages API** | openclaw gateway @ `127.0.0.1:18789` (translates → Bedrock) | Daemon exports `ANTHROPIC_BASE_URL=http://127.0.0.1:18789` + `ANTHROPIC_API_KEY` from `~/.openclaw/openclaw.json` `gateway.auth.token`. **No `/sandbox/.secrets/anthropic-key` file is required or expected.** |
+| **Bedrock subagent path** (synthesize + patterns; dream cycle) | `/sandbox/.secrets/bedrock-key` | Already managed by openclaw. Daemon exports `AWS_BEARER_TOKEN_BEDROCK` + `AWS_REGION=us-east-1`. **`@anthropic-ai/bedrock-sdk` reads `AWS_BEARER_TOKEN_BEDROCK` natively** (verified in `client.js` constructor — `apiKey` defaults to that env var). The same token serves both the openclaw gateway AND the fbrain Bedrock subagent path. No new secret file needed. |
+| **OpenAI** (embeddings — `text-embedding-3-large`, 1536 dims; verdict via gateway proxy) | `/sandbox/.secrets/openai-key` | Phase 1 of the credential-providers migration injects this; operator runs nanoclaw's `set-openai-key.sh` + `restore.sh --inject-openai-key`. |
+| **Chat / verdict** (LiteLLM-shape) | openclaw gateway @ `127.0.0.1:18789` | OpenAI-compatible Chat Completions proxy. Daemon exports `LITELLM_BASE_URL` + `LITELLM_API_KEY` from `~/.openclaw/openclaw.json` `gateway.auth.token`. fbrain config keys `models.chat`, `models.dream.synthesize_verdict` set to `litellm:openclaw` or `openai:gpt-4o-mini` to route here. |
+
+**Anthropic Messages API path:** The openclaw gateway is OpenAI-shape only — it does NOT expose `/v1/messages` and cannot translate `tool_use`/`tool_result` content blocks bidirectionally. (Earlier docs incorrectly suggested it could. That was wrong; fixed in this revision.) For Anthropic Messages API workloads, fbrain talks **directly to AWS Bedrock** since the 11mirror-stack v0.4.0 Layer 2 SDK selection landed (PRs [#9](https://github.com/Postergully/Fbrain/pull/9) + [#10](https://github.com/Postergully/Fbrain/pull/10)). Set `models.dream.synthesize` to a Bedrock inference-profile id, e.g.:
+
+```bash
+gbrain config set models.dream.synthesize bedrock:us.anthropic.claude-sonnet-4-20250514-v1:0
+```
+
+(`us.…` for US partition, `eu.…` for EU, `apac.…` for Asia-Pacific.) The subagent handler instantiates `AnthropicBedrock` from `@anthropic-ai/bedrock-sdk` automatically when the model string starts with `bedrock:`, and reads `AWS_BEARER_TOKEN_BEDROCK` from the env the daemon already exports. If the AWS account hasn't activated a model's inference profile recently, the API returns `404 Legacy / not actively using` — invoke the model once via the AWS Bedrock console playground to prime it for API access.
 
 If you see a reference to `/sandbox/.secrets/anthropic-key` anywhere, it's stale. Ignore it.
 
